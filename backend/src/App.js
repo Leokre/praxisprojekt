@@ -7,11 +7,12 @@ const crypto = require("crypto");
 const bcrypt = require('bcrypt');
 const cookieParser = require("cookie-parser")
 const mAppointments = require("./model/appointments.js")
+const mUsers = require("./model/users.js")
 
 //Body Parser Middleware
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
-app.use(cors())
+//app.use(cors())
 app.use(cookieParser())
 
 const db = require("./config/Database")
@@ -93,7 +94,8 @@ app.post("/getDates",async (req,res,next)=>{
   
   })
 
-  app.post("/createAppointment",async (req,res,next)=>{
+  app.post("/createAppointment",authenticateToken,async (req,res,next)=>{
+    const userID = req.user.id
     console.log("createAppointment")
     console.log(req.body)
     var workload = 0
@@ -103,7 +105,7 @@ app.post("/getDates",async (req,res,next)=>{
 
     if(!req.body.name || !req.body.startDate || !req.body.endDate) return "ERR_INPUT_MISSING"
     
-    res.send(await mAppointments.insertUserAppointment(req.body.name,req.body.startDate,req.body.endDate,workload,description))
+    res.send(await mAppointments.insertUserAppointment(userID,req.body.name,req.body.startDate,req.body.endDate,workload,description))
     
     })
 
@@ -112,11 +114,12 @@ app.get("/checkAuth",authenticateToken,(req,res)=>{
 res.json({auth:true,user:req.user})
 })
 
-app.post("/getAppointments",async(req,res,next)=>{
+app.post("/getAppointments",authenticateToken,async(req,res,next)=>{
+  const userID = req.user.id
 
  
 
-  res.json(await mAppointments.getUserAppointments())
+  res.json(await mAppointments.getUserAppointments(userID))
  
   
 

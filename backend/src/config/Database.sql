@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS Users (
 
 CREATE TABLE IF NOT EXISTS Appointments (
   idAppointment INT NOT NULL AUTO_INCREMENT,
+  idUser INT NOT NULL,
   Name VARCHAR(45) NOT NULL,
   Description VARCHAR(255) NULL,
   StartDate DATETIME NOT NULL,
@@ -31,11 +32,11 @@ CREATE TABLE IF NOT EXISTS Appointments (
 
 
 
-	INSERT INTO Appointments(Name,Description,StartDate,EndDate,Workload) VALUES('TestTermin 1','Description',STR_TO_DATE('20.05.2022', '%d.%m.%Y'),STR_TO_DATE('25.05.2022', '%d.%m.%Y'),12);
-	INSERT INTO Appointments(Name,Description,StartDate,EndDate,Workload) VALUES('TestTermin 2','Description',STR_TO_DATE('01.05.2022', '%d.%m.%Y'),STR_TO_DATE('27.05.2022', '%d.%m.%Y'),4);
-    INSERT INTO Appointments(Name,Description,StartDate,EndDate,Workload) VALUES('TestTermin 3','Description',STR_TO_DATE('14.04.2022', '%d.%m.%Y'),STR_TO_DATE('01.05.2022', '%d.%m.%Y'),87);
-    INSERT INTO Appointments(Name,Description,StartDate,EndDate,Workload) VALUES('TestTermin 4','Description',STR_TO_DATE('10.04.2022', '%d.%m.%Y'),STR_TO_DATE('17.04.2022', '%d.%m.%Y'),3);
-    INSERT INTO Appointments(Name,Description,StartDate,EndDate,Workload) VALUES('TestTermin 5','Description',STR_TO_DATE('29.05.2022', '%d.%m.%Y'),STR_TO_DATE('25.06.2022', '%d.%m.%Y'),35);
-    INSERT INTO Appointments(Name,Description,StartDate,EndDate,Workload) VALUES('TestTermin 6','Description',STR_TO_DATE('10.06.2022', '%d.%m.%Y'),STR_TO_DATE('15.06.2022', '%d.%m.%Y'),20);
+	INSERT INTO Appointments(idUser,Name,Description,StartDate,EndDate,Workload) VALUES(1,'TestTermin 1','Description',STR_TO_DATE('20.05.2022', '%d.%m.%Y'),STR_TO_DATE('25.05.2022', '%d.%m.%Y'),12);
+	INSERT INTO Appointments(idUser,Name,Description,StartDate,EndDate,Workload) VALUES(1,'TestTermin 2','Description',STR_TO_DATE('01.05.2022', '%d.%m.%Y'),STR_TO_DATE('27.05.2022', '%d.%m.%Y'),4);
+    INSERT INTO Appointments(idUser,Name,Description,StartDate,EndDate,Workload) VALUES(1,'TestTermin 3','Description',STR_TO_DATE('14.04.2022', '%d.%m.%Y'),STR_TO_DATE('01.05.2022', '%d.%m.%Y'),87);
+    INSERT INTO Appointments(idUser,Name,Description,StartDate,EndDate,Workload) VALUES(1,'TestTermin 4','Description',STR_TO_DATE('10.04.2022', '%d.%m.%Y'),STR_TO_DATE('17.04.2022', '%d.%m.%Y'),3);
+    INSERT INTO Appointments(idUser,Name,Description,StartDate,EndDate,Workload) VALUES(1,'TestTermin 5','Description',STR_TO_DATE('29.05.2022', '%d.%m.%Y'),STR_TO_DATE('25.06.2022', '%d.%m.%Y'),35);
+    INSERT INTO Appointments(idUser,Name,Description,StartDate,EndDate,Workload) VALUES(1,'TestTermin 6','Description',STR_TO_DATE('10.06.2022', '%d.%m.%Y'),STR_TO_DATE('15.06.2022', '%d.%m.%Y'),20);
 
 commit ;

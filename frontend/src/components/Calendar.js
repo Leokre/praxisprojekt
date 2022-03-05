@@ -118,6 +118,7 @@ const Calendar = ({dates,appointments,changeDate, selectDay, activeApp}) => {
     if (isInitialMount.current) {
         isInitialMount.current = false;
     } else {
+        if(!dates) return
         let split = new Date(dates[5])
         if(dates) setSelectedMonth(split.getMonth() + "-" + split.getFullYear())
         console.log("Selected Month:" + split.getMonth() + "-" + split.getFullYear())

@@ -6,12 +6,15 @@ import Axios from "axios";
 import { useEffect, useState} from "react"
 import Calendar from './components/Calendar';
 import AppointmentList from './components/AppointmentList';
+import qs from "qs"
 const backendURL = process.env.REACT_APP_BACKEND_URL
 
 function App() {
   const [dates_s, setDates_s] = useState();
-  const [appointments_s, setAppointments_s] = useState("");
+  const [appointments_s, setAppointments_s] = useState();
   const [activeApp, setActiveApp] = useState();
+  const [loggedIn, setLoggedIn] = useState();
+  const [username, setUsername] = useState();
   const getDates = (month, year) =>{
     console.log("Getting Dates...")
     console.log("Month: " + month)
@@ -28,11 +31,31 @@ function App() {
     });
   }
 
+  function checkAuth(){
+    
+    const check = Axios.create({
+      withCredentials: true
+    })
+   check.get(backendURL + "/checkAuth",{
+   }).then((response) =>{
+      console.log("checkAuth response:")
+      console.log(response)
+    if(response.data.user == null) {
+      console.log("NOT_AUTHORIZED")
+    }else{
+      setLoggedIn(response.data.auth)
+      setUsername(response.data.user.name)
+    }
+   } )
+  
+  }
+
+
   const getAppointments = () =>{
     console.log("Getting Appointments...")
     Axios.post(backendURL + '/getAppointments', {
 
-    })
+    },{withCredentials: true})
     .then(function (response) {
       setAppointments_s(response.data)
     })
@@ -51,6 +74,26 @@ function App() {
       description: description
     })
     .then(function (response) {
+   
+      if(response.data == "CREATION_FAILED"){
+        console.log("APPOINTMENT CREATION FAILED")
+        return
+      } else {
+          console.log("Appointment created successfully")
+          console.log(response.data)
+          let tmp = appointments_s
+          console.log("tmp before:")
+          console.log(tmp)
+          tmp.push(response.data)
+          console.log("tmp after:")
+          console.log(tmp)
+          console.log("Setting Appointments...")
+          setAppointments_s(tmp)
+          console.log("results:")
+          console.log(appointments_s)
+      }
+
+      //window.location.reload()
       //do something
     })
     .catch(function (error) {
@@ -62,6 +105,20 @@ function App() {
     setActiveApp(date)
   }
 
+  const renderLoginButton = () =>{
+    if(loggedIn){
+      return <Button size="lg" onClick={()=>logout()}>LOGOUT</Button>} 
+      else return <Button size="lg" onClick={()=>login("User1","Password1")}>LOGIN</Button>
+  }
+
+  const renderMessage = () =>{
+    console.log("renderMessage called")
+    console.log("loggedIn: " + loggedIn)
+    console.log("username: " + username)
+    if(loggedIn){
+      return <h>Willkommen, {username}</h>} 
+      else return <h>Willkommen</h>
+  }
 
   function loggedInMenu(){
 
@@ -77,7 +134,7 @@ function App() {
           <Container>
           <Row className="p-0">
             <Col className="p-0 ">
-              <Button size="lg" onClick={()=>changeDate(-1)}>LOGIN</Button>
+              {renderMessage()}
             </Col>
             <Col className="p-0">
               <Button size="lg" onClick={()=>createAppointment("FrontendTest",activeApp,activeApp,"description",0)}>Termin erstellen</Button>
@@ -89,7 +146,8 @@ function App() {
               <Button size="lg" onClick={()=>changeDate(-1)}>TEST</Button>
             </Col>
             <Col className="p-0">
-              <Button size="lg" onClick={()=>changeDate(-1)}>TEST</Button>
+              {renderLoginButton()}
+              
             </Col>
 
             
@@ -108,6 +166,75 @@ function App() {
 
   }
 
+
+  function login (usr,pwd){
+
+    const log = Axios.create({
+        withCredentials: true
+      })
+
+      log({
+          method: 'post',
+          url: backendURL+"/Login",
+          data: qs.stringify({
+            username: usr,
+            password: pwd
+          }),
+          headers: {
+            'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
+          }
+        }).then(response => {
+            //console.log(response)
+                
+               if(response.data.msg == "UserNamePasswordError") alert("Username oder Passwort sind falsch")
+                
+               window.location.reload();
+
+          
+      })
+  }
+
+  function logout(){
+    const log = Axios.create({
+      withCredentials: true
+    })
+    log.get(backendURL +"/Logout").then(response => {
+        console.log(response.data)
+        if(response.data == "LOGOUT_SUCCESS"){
+           // alert("Logout erfolgreich")
+            window.location.reload();
+        }
+        
+    })
+
+    
+  }
+
+  /*
+  const login = (usr,pwd) => {
+
+    Axios.post(backendURL + '/Login', {
+        username: "User1",
+        password: "Password1"
+    })
+    .then(function (response) {
+
+      if(response.data.msg == "UserNamePasswordError") alert("Username oder Passwort sind falsch")
+                
+               //window.location.reload();
+      if(response.data.auth){
+        console.log("Login successful!")
+        console.log(response.data)
+
+      } 
+  
+      //do something
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+  }
+*/
   const changeDate = (direction) => {
     if(direction instanceof Date){
       console.log("Direction Month: " + direction.getMonth())
@@ -139,6 +266,7 @@ function App() {
       getAppointments()
 
     }
+    if(!loggedIn) checkAuth()
     
     
     

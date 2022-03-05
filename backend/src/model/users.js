@@ -1,5 +1,4 @@
 const db = require("../config/Database")
-const defaultQuickReplies = "Komme 5 Minuten später;Komme 10 Minuten später;SchnellAntwort3;SchnellAntwort4;SchnellAntwort5"
 
 exports.getUserSessions = async function(userID){
 
