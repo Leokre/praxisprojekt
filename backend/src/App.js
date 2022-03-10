@@ -24,7 +24,7 @@ var cookie = require('cookie')
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", frontEnd);
   res.header("Access-Control-Allow-Credentials", "true");
-  //res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
 
@@ -98,15 +98,15 @@ app.post("/getDates",async (req,res,next)=>{
     const userID = req.user.id
     console.log("createAppointment")
     console.log(req.body)
+    console.log("userID:" + userID)
     var workload = 0
     var description = ""
     if(req.body.workload) workload = parseInt(req.body.workload)
-    if(req.body.description) workload = req.body.description
+    if(req.body.description) description = req.body.description
 
     if(!req.body.name || !req.body.startDate || !req.body.endDate) return "ERR_INPUT_MISSING"
-    
+
     res.send(await mAppointments.insertUserAppointment(userID,req.body.name,req.body.startDate,req.body.endDate,workload,description))
-    
     })
 
 app.get("/checkAuth",authenticateToken,(req,res)=>{
@@ -127,15 +127,15 @@ app.post("/getAppointments",authenticateToken,async(req,res,next)=>{
 })
 
 app.post("/Login", async (req,res) => {
-  const {username,password} = req.body
+  const {email,password} = req.body
   
-  var result = await mUsers.getUserByName(username)
+  var result = await mUsers.getUserByEmail(email)
 
   if(result.length < 1) return res.json({auth: false, msg: "UserNamePasswordError"})
   const validPassword = await bcrypt.compare(password, result[0].Password);
 
   if(!validPassword) return res.json({auth: false, msg: "UserNamePasswordError"})
-  const accessToken = generateToken(username,result[0].idUser)
+  const accessToken = generateToken(email,result[0].idUser)
 
   res.status(202)
       .cookie("accessToken", accessToken,{sameSite: 'strict',

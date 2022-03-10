@@ -1,11 +1,12 @@
 const db = require("../config/Database")
 
 exports.getUserAppointments = async function(userID){
+    console.log
     var results = await db.promise().query("SELECT * from Appointments WHERE idUser=" + userID + " ORDER BY EndDate;").catch((err)=>{return err})
     return results[0]
   }
 
-exports.insertUserAppointment = async function(name,startDate,endDate,workload=0,description=""){
+exports.insertUserAppointment = async function(userID,name,startDate,endDate,workload=0,description=""){
   console.log("Workload: ")
   console.log(workload)
     let tmp = new Date(startDate)

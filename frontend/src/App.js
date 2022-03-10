@@ -1,11 +1,13 @@
 import './App.css';
-import {Button, Alert, Breadcrumb, Card, Form, Container, Row, Col} from 'react-bootstrap'
+import {Button, Alert, Breadcrumb, Card, Form, Container, Row, Col, Navbar, NavbarBrand, NavItem} from 'react-bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { FaAngleDoubleLeft , FaAngleDoubleRight} from 'react-icons/fa';
 import Axios from "axios";
 import { useEffect, useState} from "react"
 import Calendar from './components/Calendar';
 import AppointmentList from './components/AppointmentList';
+import LoginModal from './navbarItems/LoginModal';
+import CreateAppointmentModal from './navbarItems/CreateAppointmentModal';
 import qs from "qs"
 const backendURL = process.env.REACT_APP_BACKEND_URL
 
@@ -15,6 +17,11 @@ function App() {
   const [activeApp, setActiveApp] = useState();
   const [loggedIn, setLoggedIn] = useState();
   const [username, setUsername] = useState();
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [createAppModalOpen, setCreateAppModalOpen] = useState(false);
+
+
+
   const getDates = (month, year) =>{
     console.log("Getting Dates...")
     console.log("Month: " + month)
@@ -72,7 +79,7 @@ function App() {
       endDate: endDate,
       workload: parseInt(workload),
       description: description
-    })
+    },{withCredentials: true})
     .then(function (response) {
    
       if(response.data == "CREATION_FAILED"){
@@ -105,69 +112,47 @@ function App() {
     setActiveApp(date)
   }
 
-  const renderLoginButton = () =>{
+  const renderLoginButton = (cName="nav-item nav-link") =>{
+
+    
     if(loggedIn){
-      return <Button size="lg" onClick={()=>logout()}>LOGOUT</Button>} 
-      else return <Button size="lg" onClick={()=>login("User1","Password1")}>LOGIN</Button>
+      return <NavItem className={cName} href="#" onClick={()=>logout()}>LOGOUT</NavItem>} 
+      else return <NavItem className={cName} href="#" onClick={()=>setLoginModalOpen(true)}>LOGIN</NavItem>
   }
 
-  const renderMessage = () =>{
-    console.log("renderMessage called")
-    console.log("loggedIn: " + loggedIn)
-    console.log("username: " + username)
+  const generateNavbarBrand = () =>{
     if(loggedIn){
-      return <h>Willkommen, {username}</h>} 
-      else return <h>Willkommen</h>
+      
+      return <NavbarBrand href="#">Willkommen, {username}</NavbarBrand>} 
+      else return <NavbarBrand href="#">Willkommen</NavbarBrand>
   }
 
-  function loggedInMenu(){
+
+
+
+
+  function generateNavbar(){
 
 
 
     return (
-      <div className="App">
-        {/*Weiterleitungslogik hier rein*/}
-
-        <div className="MainMenu">
-          <div className="Buttons">
-
-          <Container>
-          <Row className="p-0">
-            <Col className="p-0 ">
-              {renderMessage()}
-            </Col>
-            <Col className="p-0">
-              <Button size="lg" onClick={()=>createAppointment("FrontendTest",activeApp,activeApp,"description",0)}>Termin erstellen</Button>
-            </Col>
-            <Col className="p-0">
-              <Button size="lg" onClick={()=>changeDate(-1)}>TEST</Button>
-            </Col>
-            <Col className="p-0">
-              <Button size="lg" onClick={()=>changeDate(-1)}>TEST</Button>
-            </Col>
-            <Col className="p-0">
-              {renderLoginButton()}
-              
-            </Col>
-
-            
-          </Row>
-          
-        </Container>
-
-          </div>      
-        </div>
-  
+      <Navbar className="navbar navbar-dark bg-dark">
+        {generateNavbarBrand()}
+        <NavItem className="nav-item nav-link" href="#" onClick={()=>setCreateAppModalOpen(true)}>Termin erstellen</NavItem>
         
-        
-      </div>
+        <NavItem className="nav-item nav-link" href="#">Test2</NavItem>
+        <NavItem className="nav-item nav-link" href="#">Test3</NavItem>
+        {renderLoginButton()}
+      </Navbar>
+      
 
     );
 
   }
 
 
-  function login (usr,pwd){
+  function login (eml,pwd){
+    console.log("Logging in... usr: " + eml + " ,pwd: " + pwd)
 
     const log = Axios.create({
         withCredentials: true
@@ -177,14 +162,14 @@ function App() {
           method: 'post',
           url: backendURL+"/Login",
           data: qs.stringify({
-            username: usr,
+            email: eml,
             password: pwd
           }),
           headers: {
             'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
           }
         }).then(response => {
-            //console.log(response)
+            console.log(response)
                 
                if(response.data.msg == "UserNamePasswordError") alert("Username oder Passwort sind falsch")
                 
@@ -210,31 +195,7 @@ function App() {
     
   }
 
-  /*
-  const login = (usr,pwd) => {
-
-    Axios.post(backendURL + '/Login', {
-        username: "User1",
-        password: "Password1"
-    })
-    .then(function (response) {
-
-      if(response.data.msg == "UserNamePasswordError") alert("Username oder Passwort sind falsch")
-                
-               //window.location.reload();
-      if(response.data.auth){
-        console.log("Login successful!")
-        console.log(response.data)
-
-      } 
-  
-      //do something
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
-  }
-*/
+ 
   const changeDate = (direction) => {
     if(direction instanceof Date){
       console.log("Direction Month: " + direction.getMonth())
@@ -275,9 +236,12 @@ function App() {
 
 
   return (
-    <div className="App">
-      {loggedInMenu()}
+    <div className="App">     
+    <LoginModal isOpen={loginModalOpen} setOpenState={setLoginModalOpen} login={login}></LoginModal>
+    <CreateAppointmentModal isOpen={createAppModalOpen} setOpenState={setCreateAppModalOpen} createApp={createAppointment}></CreateAppointmentModal>
+      	{generateNavbar()}
       <header className="App-header">
+        
         <Container fluid>
         <Row className="mb-3">
           <Col id="calendar" className="custom sm-3" fluid>

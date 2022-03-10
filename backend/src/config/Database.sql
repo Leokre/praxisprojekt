@@ -3,7 +3,7 @@ DROP TABLE IF EXISTS Appointments;
 
 CREATE TABLE IF NOT EXISTS Users (
   idUser INT NOT NULL AUTO_INCREMENT,
-  Username VARCHAR(45) NOT NULL UNIQUE,
+  Email VARCHAR(45) NOT NULL UNIQUE,
   Password VARCHAR(255) NULL,
   Role INT NULL,
   PRIMARY KEY (idUser)
@@ -22,13 +22,13 @@ CREATE TABLE IF NOT EXISTS Appointments (
   
     );
     
-	INSERT INTO USERS(Username,Password,Role) VALUES('User1','$2b$10$D4Uchb9gcKJ6WLdU6lw5TOMNPKRCSsvPrKQqBP1EjHywGlQeN/39S',0);
-	INSERT INTO USERS(Username,Password,Role) VALUES('User2','$2b$10$FXuFgga.yM31J.Z9eGkOEuMjjRd2NDkX29Z0WN8nDruJ63hCoGKMK',0);
-	INSERT INTO USERS(Username,Password,Role) VALUES('User3','$2b$10$k1a1knMr6xpOyVa/OU04P.fySG.vaaPTkAg3X7g8nQfovyslT0e/2',0);
-	INSERT INTO USERS(Username,Password,Role) VALUES('User4','$2b$10$tATvyHz8Ypi3I.VRgak7.uStvV.GXp35JFRR/ZQjYTORbnbGdJoFG',0);
-	INSERT INTO USERS(Username,Password,Role) VALUES('User5','$2b$10$G6Co478C2Qjdxf04lkAsveNlLedp54hN3n2OR9XkViavma5m.n6gS',0);
-	INSERT INTO USERS(Username,Password,Role) VALUES('User6','$2b$10$DRuIpojZ87dYO1Fv3fZH6enDAvHYqJfyskvOJ1HaYOXqm.aA7Q5c.',0);
-	INSERT INTO USERS(Username,Password,Role) VALUES('User7','$2b$10$.DBIm/bszFnw6PJ8w.svbuiChQseVgTbwwSq0W6A0uuo0zK02Uhni',0);
+	INSERT INTO USERS(Email,Password,Role) VALUES('User@1.com','$2b$10$D4Uchb9gcKJ6WLdU6lw5TOMNPKRCSsvPrKQqBP1EjHywGlQeN/39S',0);
+	INSERT INTO USERS(Email,Password,Role) VALUES('User@2.com','$2b$10$FXuFgga.yM31J.Z9eGkOEuMjjRd2NDkX29Z0WN8nDruJ63hCoGKMK',0);
+	INSERT INTO USERS(Email,Password,Role) VALUES('User@3.com','$2b$10$k1a1knMr6xpOyVa/OU04P.fySG.vaaPTkAg3X7g8nQfovyslT0e/2',0);
+	INSERT INTO USERS(Email,Password,Role) VALUES('User@4.com','$2b$10$tATvyHz8Ypi3I.VRgak7.uStvV.GXp35JFRR/ZQjYTORbnbGdJoFG',0);
+	INSERT INTO USERS(Email,Password,Role) VALUES('User@5.com','$2b$10$G6Co478C2Qjdxf04lkAsveNlLedp54hN3n2OR9XkViavma5m.n6gS',0);
+	INSERT INTO USERS(Email,Password,Role) VALUES('User@6.com','$2b$10$DRuIpojZ87dYO1Fv3fZH6enDAvHYqJfyskvOJ1HaYOXqm.aA7Q5c.',0);
+	INSERT INTO USERS(Email,Password,Role) VALUES('User@7.com','$2b$10$.DBIm/bszFnw6PJ8w.svbuiChQseVgTbwwSq0W6A0uuo0zK02Uhni',0);
 
 
 

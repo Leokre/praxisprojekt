@@ -8,16 +8,16 @@ exports.getUserSessions = async function(userID){
     
   }
 
-exports.insertUser = async function(username,password){
+exports.insertUser = async function(email,password){
 
-    var results = await db.promise().query("INSERT INTO USERS(Username,Password,SchnellAntwort) VALUES('" + username + "','" + password +"','" + defaultQuickReplies + "')").catch((err)=>{return err})
+    var results = await db.promise().query("INSERT INTO USERS(Email,Password,SchnellAntwort) VALUES('" + email + "','" + password +"','" + defaultQuickReplies + "')").catch((err)=>{return err})
     return "USER_CREATED"
   
   }
 
-exports.getUserByName = async function(username){
+exports.getUserByEmail = async function(email){
 
-  var results = await db.promise().query("SELECT * FROM USERS WHERE USERNAME='" + username + "';").catch((err)=>{return err})
+  var results = await db.promise().query("SELECT * FROM USERS WHERE EMAIL='" + email + "';").catch((err)=>{return err})
   return results[0]
   
 }
