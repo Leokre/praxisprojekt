@@ -43,7 +43,7 @@ const LoginModal = ({isOpen, setOpenState,login}) => {
           <Row>
             <Col md>
           <Form.Group controlId="formEmail">
-            <Form.Label>Email Address</Form.Label>
+            <Form.Label>Email Addresse</Form.Label>
             <Form.Control type="text" placeholder="example@gmail.com" value={emailState} onInput={e => setEmailState(e.target.value)}/>
             <Form.Text className="text-muted">
             </Form.Text>
@@ -51,15 +51,15 @@ const LoginModal = ({isOpen, setOpenState,login}) => {
           </Col>
           <Col md>
           <Form.Group controlId="formPassword">
-            <Form.Label>Password</Form.Label>
-            <Form.Control type="password" placeholder="Password" value={passwordState} onInput={e => setPasswordState(e.target.value)}/>
+            <Form.Label>Passwort</Form.Label>
+            <Form.Control type="password" placeholder="Passwort" value={passwordState} onInput={e => setPasswordState(e.target.value)}/>
           </Form.Group>
           </Col>
           </Row>
         
         </ModalBody>
         <ModalFooter>
-            <Button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={()=>setOpenState(false)}>Close</Button>
+            <Button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={()=>setOpenState(false)}>Schließen</Button>
             <Button type="button" className="btn btn-primary" data-dismiss="modal" onClick={()=>login(emailState,passwordState)}>Login</Button>
         </ModalFooter>
         </Form>

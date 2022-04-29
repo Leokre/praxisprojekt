@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import { FaAngleDoubleLeft , FaAngleDoubleRight} from 'react-icons/fa';
 import {useEffect, useState, useRef} from "react"
 import ModalHeader from 'react-bootstrap/esm/ModalHeader';
-const CreateAppointmentModal = ({isOpen, setOpenState,createApp}) => {
+const CreateAppointmentModal = ({isOpen, setOpenState,createApp,getDates}) => {
     const [name_s, setName_s] = useState("");
     const [description_s, setDescription_s] = useState("");
     const [startDate_s, setStartDate_s] = useState("");
@@ -29,7 +29,7 @@ const CreateAppointmentModal = ({isOpen, setOpenState,createApp}) => {
    
     return (
 <>
-<Modal show={isOpen} id="loginModal" className="modal fade" >
+<Modal show={isOpen} id="createAppModal" className="modal fade" >
     <ModalDialog className="modal-dialog-centered" role="document">
     <Form >
         <ModalHeader>
@@ -48,7 +48,7 @@ const CreateAppointmentModal = ({isOpen, setOpenState,createApp}) => {
             </Col>
             <Col md>
                 <Form.Group controlId="formNumber">
-                    <Form.Label>Workload</Form.Label>
+                    <Form.Label>Gesamtworkload (in Stunden)</Form.Label>
                     <Form.Control type="number" placeholder="20" value={workload_s} onInput={e => setWorkload_s(e.target.value)}/>
                 </Form.Group>
             </Col>
@@ -72,7 +72,7 @@ const CreateAppointmentModal = ({isOpen, setOpenState,createApp}) => {
             <Col md>
                 <Form.Group controlId="formText">
                     <Form.Label>Beschreibung</Form.Label>
-                    <Form.Control type="text" placeholder="Bla bla bla" value={description_s} onInput={e => setDescription_s(e.target.value)}/>
+                    <Form.Control type="text" placeholder="Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam" value={description_s} onInput={e => setDescription_s(e.target.value)}/>
                     <Form.Text className="text-muted"/>
                 </Form.Group>
             </Col>
@@ -80,14 +80,14 @@ const CreateAppointmentModal = ({isOpen, setOpenState,createApp}) => {
         
         </ModalBody>
         <ModalFooter>
-            <Button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={()=>setOpenState(false)}>Close</Button>
-            <Button type="button" className="btn btn-primary" data-dismiss="modal" onClick={()=>createApp(name_s,startDate_s,endDate_s,workload_s,description_s)}>Termin erstellen</Button>
+            <Button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={()=>setOpenState(false)}>Schließen</Button>
+            <Button type="button" className="btn btn-primary" data-dismiss="modal" onClick={()=>{createApp(name_s,startDate_s,endDate_s,workload_s,description_s);const eDate= new Date(endDate_s);getDates(eDate.getMonth(),eDate.getFullYear());setName_s("");setDescription_s("");setStartDate_s("");setEndDate_s("");setWorkload_s("");setName_s("");}}>Termin erstellen</Button>
         </ModalFooter>
         </Form>
     </ModalDialog>
 </Modal>
 
-</>
+</>   
     
 )}
 

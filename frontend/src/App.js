@@ -1,14 +1,18 @@
 import './App.css';
 import {Button, Alert, Breadcrumb, Card, Form, Container, Row, Col, Navbar, NavbarBrand, NavItem} from 'react-bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { FaAngleDoubleLeft , FaAngleDoubleRight} from 'react-icons/fa';
 import Axios from "axios";
 import { useEffect, useState} from "react"
 import Calendar from './components/Calendar';
 import AppointmentList from './components/AppointmentList';
 import LoginModal from './navbarItems/LoginModal';
 import CreateAppointmentModal from './navbarItems/CreateAppointmentModal';
+import AppointmentDetailsModal from './components/AppointmentDetailsModal';
+import PickCourseDropdown from './navbarItems/PickCourseDropdown';
+import ImportAppointmentsDropdown from './navbarItems/ImportAppointmentsDropdown';
 import qs from "qs"
+import CalendarDayDetailsModal from './components/CalendarDayDetailsModal';
+
 const backendURL = process.env.REACT_APP_BACKEND_URL
 
 function App() {
@@ -17,25 +21,73 @@ function App() {
   const [activeApp, setActiveApp] = useState();
   const [loggedIn, setLoggedIn] = useState();
   const [username, setUsername] = useState();
+  const [userRole, setUserRole] = useState();
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [createAppModalOpen, setCreateAppModalOpen] = useState(false);
+  const [appDetailsModalOpen, setAppDetailsModalOpen] = useState(null);
+  const [calDayDetailsModalOpen, setCalDayDetailsModalOpen] = useState(null);
+  const [adminCourses, setAdminCourses] = useState();
+  const [activeCourse, setActiveCourse] = useState();
+  const [importedAppointments, setImportedAppointments] = useState();
+
+  
+ 
+  const getExternalAppointments = async (code) =>{
+    window.history.pushState('', 'Title', '/');
+    return Axios.post(backendURL + '/getExternalAppointments', {
+      code: code,
+    },{withCredentials:true})
+    .then(function (response) {
+      console.log(response.data)
+      //window.location.href = 'http://localhost:3000'
+      //window.location.href = "www.mysite.com/page2.php";  
+      setImportedAppointments(response.data)
+      
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+  }
 
 
 
   const getDates = (month, year) =>{
     console.log("Getting Dates...")
-    console.log("Month: " + month)
-    console.log("Year: " + year)
-    Axios.post(backendURL + '/getDates', {
-      month: month,
-      year: year
-    })
-    .then(function (response) {
-      setDates_s(response.data)
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
+      console.log("Month: " + month)
+      console.log("Year: " + year)
+    if(loggedIn){
+      console.log("userRole:" + userRole + " activeCourse: " + activeCourse)
+      console.log(activeCourse)
+      if(userRole === 1 && activeCourse){
+        Axios.post(backendURL + '/getDates', {
+          month: month,
+          year: year,
+          courseID: activeCourse.idCourse
+        },{withCredentials:true})
+        .then(function (response) {
+          setDates_s(response.data)
+          console.log("dates_s: ")
+          console.log(response.data)
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      }else if(userRole === 0){
+        Axios.post(backendURL + '/getDates', {
+          month: month,
+          year: year
+        },{withCredentials:true})
+        .then(function (response) {
+          setDates_s(response.data)
+          console.log("dates_s: ")
+          console.log(response.data)
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
+    }
+    
   }
 
   function checkAuth(){
@@ -52,23 +104,95 @@ function App() {
     }else{
       setLoggedIn(response.data.auth)
       setUsername(response.data.user.name)
+      setUserRole(response.data.user.role)
+      if(response.data.user.role == 1){
+        console.log("USER IS ADMIN")
+        getAdminsCourses()
+      } 
     }
    } )
   
   }
 
 
-  const getAppointments = () =>{
-    console.log("Getting Appointments...")
-    Axios.post(backendURL + '/getAppointments', {
+  const deleteAppointment = (courseID,appointmentID) => {
 
+    Axios.post(backendURL + '/deleteAppointment', {
+      courseID:courseID,
+      appointmentID:appointmentID
     },{withCredentials: true})
     .then(function (response) {
-      setAppointments_s(response.data)
+      if(response.data == "DELETION_SUCCESS"){
+        //window.location.reload()
+        var currentDate = new Date(dates_s[5].date)
+       
+        getDates(currentDate.getMonth(),currentDate.getFullYear())
+        getAppointments()
+        setAppDetailsModalOpen(null)
+      }
+      if(response.data == "DELETION_FAILED") alert("Keine Berechtigung diesen Termin zu löschen")
     })
     .catch(function (error) {
       console.log(error);
     });
+
+  }
+
+  function getAdminsCourses(){
+    
+    const check = Axios.create({
+      withCredentials: true
+    })
+   check.post(backendURL + "/getAdminsCourses",{
+   }).then((response) =>{
+      console.log("getAdminsCourses response:")
+      console.log(response)
+    if(response.data[0] == null) {
+      console.log("NO_COURSES")
+    }else{
+      setAdminCourses(response.data)
+      setActiveCourse(response.data[0])
+    }
+   } )
+  
+  }
+
+
+
+  const getAppointments = () =>{
+    console.log("Getting Appointments...")
+    console.log("activeCourse: ")
+    console.log(activeCourse)
+    if(activeCourse){
+      Axios.post(backendURL + '/getCourseAppointments', {
+        courseID:activeCourse.idCourse
+      },{withCredentials: true})
+      .then(function (response) {
+        console.log("APPOINTMENTS RESPONSE: ")
+        console.log(response.data)
+        setAppointments_s(response.data)
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    }else{ 
+      Axios.post(backendURL + '/getAppointments', {
+
+      },{withCredentials: true})
+      .then(function (response) {
+        setAppointments_s(response.data)
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    }
+    
+  }
+
+  const startAppointmentImport = (provider) => {
+    if(!provider) return
+    window.location = process.env.REACT_APP_BACKEND_URL + '/auth/' + provider
+
   }
 
   const createAppointment = (name,startDate,endDate,workload=0,description="") =>{
@@ -77,31 +201,17 @@ function App() {
       name: name,
       startDate: startDate,
       endDate: endDate,
-      workload: parseInt(workload),
+      workload: parseFloat(workload),
       description: description
     },{withCredentials: true})
     .then(function (response) {
    
-      if(response.data == "CREATION_FAILED"){
-        console.log("APPOINTMENT CREATION FAILED")
-        return
-      } else {
-          console.log("Appointment created successfully")
-          console.log(response.data)
-          let tmp = appointments_s
-          console.log("tmp before:")
-          console.log(tmp)
-          tmp.push(response.data)
-          console.log("tmp after:")
-          console.log(tmp)
-          console.log("Setting Appointments...")
-          setAppointments_s(tmp)
-          console.log("results:")
-          console.log(appointments_s)
-      }
-
-      //window.location.reload()
-      //do something
+      if(response.data == "CREATION_FAILED") return alert("APPOINTMENT CREATION FAILED")
+      
+      var currentDate = new Date(dates_s[5].date)
+      getDates(currentDate.getMonth(),currentDate.getFullYear())
+      getAppointments()
+      setCreateAppModalOpen(false)
     })
     .catch(function (error) {
       console.log(error);
@@ -112,12 +222,11 @@ function App() {
     setActiveApp(date)
   }
 
-  const renderLoginButton = (cName="nav-item nav-link") =>{
+  const renderLoginButton = (cName="ms-auto") =>{
 
     
-    if(loggedIn){
-      return <NavItem className={cName} href="#" onClick={()=>logout()}>LOGOUT</NavItem>} 
-      else return <NavItem className={cName} href="#" onClick={()=>setLoginModalOpen(true)}>LOGIN</NavItem>
+    if(loggedIn) return <NavItem className={cName}><Button  variant="danger" href="#" onClick={()=>logout()}>LOGOUT</Button ></NavItem>
+      else return <NavItem className={cName}><Button  variant="success" href="#" onClick={()=>setLoginModalOpen(true)}>LOGIN</Button ></NavItem>
   }
 
   const generateNavbarBrand = () =>{
@@ -127,9 +236,42 @@ function App() {
       else return <NavbarBrand href="#">Willkommen</NavbarBrand>
   }
 
+  const genKursName = () =>{
+    if(userRole === 1 && activeCourse){
+      
+      return <NavbarBrand href="#">Aktiver Kurs: {activeCourse.Name}</NavbarBrand>} 
+  }
+
+  function renderPickCourseButton(){
+
+    //if(userRole === 1) return (<NavItem className="nav-item nav-link dropdown" href="#" >Kursauswahl</NavItem> );
+
+    if(userRole === 1) return (<PickCourseDropdown courses={adminCourses} setActiveCourse={setActiveCourse}/>);
+
+
+    return (<></>)
+
+  }
+
+  function renderAppointmentImportButton(){
 
 
 
+    //if(userRole === 1) return (<NavItem className="nav-item nav-link dropdown" href="#" >Kursauswahl</NavItem> );
+
+    if(userRole === 0) return (<ImportAppointmentsDropdown startAppointmentImport={startAppointmentImport}/>);
+
+
+    return (<></>)
+
+  }
+
+  const renderCreateAppButton = (cName="nav-item nav-link") =>{
+
+    
+    if(loggedIn) return <NavItem className={cName} href="#" onClick={()=>setCreateAppModalOpen(true)}>Termin erstellen</NavItem>
+    else return <></>
+  }
 
   function generateNavbar(){
 
@@ -138,10 +280,10 @@ function App() {
     return (
       <Navbar className="navbar navbar-dark bg-dark">
         {generateNavbarBrand()}
-        <NavItem className="nav-item nav-link" href="#" onClick={()=>setCreateAppModalOpen(true)}>Termin erstellen</NavItem>
-        
-        <NavItem className="nav-item nav-link" href="#">Test2</NavItem>
-        <NavItem className="nav-item nav-link" href="#">Test3</NavItem>
+        {renderCreateAppButton()}
+        {renderPickCourseButton()}
+        {renderAppointmentImportButton()}
+        {genKursName()}
         {renderLoginButton()}
       </Navbar>
       
@@ -149,6 +291,8 @@ function App() {
     );
 
   }
+
+  
 
 
   function login (eml,pwd){
@@ -202,7 +346,7 @@ function App() {
       console.log("Direction Year: " + direction.getFullYear())
       getDates(direction.getMonth(),direction.getFullYear())
     } else{
-      var date = new Date(dates_s[5])
+      var date = new Date(dates_s[5].date)
       if(direction > 0){
         date.setDate(date.getDate() + 30)
       }else{
@@ -216,92 +360,112 @@ function App() {
      
   }
 
+
   useEffect(()=>{
     var currentDate = new Date()
+    console.log("current Date:")
+    console.log(currentDate)
+    console.log("loggedIn:")
+    console.log(loggedIn)
+    console.log("dates_s:")
+    console.log(dates_s)
+    console.log("appointments_s:")
+    console.log(appointments_s)
     //setDates_s(getDates(currentDate.getMonth(),currentDate.getFullYear()))
-    if(!dates_s) {
 
+
+    
+  const bla = window.location.search
+  const queryParams = new URLSearchParams(bla)
+  const code = queryParams.get("code")
+  if(code){
+    getExternalAppointments(code)
+  }
+
+
+ 
+
+    if(!loggedIn) checkAuth()
+    if(!dates_s) {
+      console.log("Dates empty, getting dates from backend...")
       getDates(currentDate.getMonth(),currentDate.getFullYear())
     }
     if(!appointments_s) {
+      console.log("Appointments empty, getting appointments from backend...")
       getAppointments()
 
     }
-    if(!loggedIn) checkAuth()
-    
     
     
 
   })
 
+  useEffect(() => {
+    if(!importedAppointments) return
+    console.log("Appointment import received, creating appointments...")
+    console.log("importedAppointments: ")
+    console.log(importedAppointments[0].summary)
+    for(let i=0;i<importedAppointments.length;i++){
+      console.log("APP:")
+      console.log(importedAppointments[i])
+      let name = importedAppointments[i].summary
+      let startDate = importedAppointments[i].start.dateTime
+      let endDate = importedAppointments[i].end.dateTime
+      let workload = new Date(endDate).getTime() - new Date(startDate).getTime()
+      workload = workload / (1000 * 60 * 60)
+      console.log("APPWORKLOAD:" + workload)
+      let description = importedAppointments[i].description || ""
+      createAppointment(name,startDate,endDate,workload,description)
+    }
+  }, [importedAppointments])
+
+useEffect(() => {
+  console.log("activeCourse updated, getting Appointments...")
+  console.log(activeCourse)
+  getAppointments()
+}, [activeCourse])
+
+  const generateMainContent = () =>{
+    if(!loggedIn){
+      return (<>
+        <p style={{fontSize: 150}}>Terminkalender</p>
+        <p>Bitte per Hochschul-Email einloggen um Zugriff auf die Funktionalitäten zu erhalten</p>
+      
+
+
+      </>)
+    }
+    return <Container fluid>
+    <Row className="mb-3">
+      <Col id="calendar" className="custom sm-3" fluid>
+      <Calendar setDayOpen={setCalDayDetailsModalOpen} activeApp={activeApp} dates={dates_s} changeDate={changeDate} selectDay={selectDay}/>
+
+      </Col>
+      <Col id="appointments" className="sm-3" fluid>
+      {console.log("activeApp: " + activeApp)}
+      <AppointmentList dates={dates_s} appointments={appointments_s} activeApp={activeApp} selectDay={selectDay} setAppDetailsModalOpen={setAppDetailsModalOpen}/>
+
+      </Col>
+    </Row>
+    </Container>
+  }
 
   return (
-    <div className="App">     
+    <div className="App">   
+    {console.log("RENDERING")}
+    <CalendarDayDetailsModal appointments={appointments_s} openDay={calDayDetailsModalOpen} setOpenDay={setCalDayDetailsModalOpen}></CalendarDayDetailsModal>  
+    <AppointmentDetailsModal deleteAppointment={deleteAppointment} openApp={appDetailsModalOpen} setOpenApp={setAppDetailsModalOpen}></AppointmentDetailsModal>
     <LoginModal isOpen={loginModalOpen} setOpenState={setLoginModalOpen} login={login}></LoginModal>
-    <CreateAppointmentModal isOpen={createAppModalOpen} setOpenState={setCreateAppModalOpen} createApp={createAppointment}></CreateAppointmentModal>
+    <CreateAppointmentModal isOpen={createAppModalOpen} setOpenState={setCreateAppModalOpen} createApp={createAppointment} getDates={getDates}></CreateAppointmentModal>
       	{generateNavbar()}
       <header className="App-header">
-        
-        <Container fluid>
-        <Row className="mb-3">
-          <Col id="calendar" className="custom sm-3" fluid>
-          <Calendar  activeApp={activeApp} dates={dates_s} changeDate={changeDate} selectDay={selectDay}/>
-
-          </Col>
-          <Col id="appointments" className="sm-3" fluid>
-          {console.log("activeApp: " + activeApp)}
-          <AppointmentList dates={dates_s} appointments={appointments_s} activeApp={activeApp} selectDay={selectDay} />
-
-          </Col>
-        </Row>
-        </Container>
+        {generateMainContent()}
         
       
 
 
 
-        {/* TESTING */}
-        <Container hidden>
-        <Form>
-          <Row>
-            <Col md>
-          <Form.Group controlId="formEmail">
-            <Form.Label>Email Address</Form.Label>
-            <Form.Control type="email" placeholder="example@gmail.com"/>
-            <Form.Text className="text-muted">
-              FORMTEXT YAYAYA
-            </Form.Text>
-          </Form.Group>
-          </Col>
-          <Col md>
-          <Form.Group controlId="formPassword">
-            <Form.Label>Password</Form.Label>
-            <Form.Control type="password" placeholder="Password"/>
-          </Form.Group>
-          </Col>
-          </Row>
-          <Button variant="secondary" type="submit">Submit</Button>
-        </Form>
-        <Card className="mb-3" style={{color: "#000"}}>
-          <Card.Img src="https://www.skiamade.com/regionen/salzburger-sportwelt/SSS/image-thumb__914336__hero-small/Snow%20Space%20Salzburg_Header%20f%C3%BCr%20St.%20Johann_CSchartner~-~767w.webp"/>
-          <Card.Body>
-            <Card.Title>
-              CardTitle
-            </Card.Title>
-            <Card.Text>
-              CardText jajaja
-            </Card.Text>
-            <Button>Test Button</Button>
-          </Card.Body>
-        </Card>
-        <Breadcrumb>
-          <Breadcrumb.Item>Test 1</Breadcrumb.Item>
-          <Breadcrumb.Item>Test 2</Breadcrumb.Item>
-          <Breadcrumb.Item active>Test 3</Breadcrumb.Item>
-        </Breadcrumb>
-        <Alert variant="success">SuccessAlert</Alert>
-        <Button>Test Button</Button>
-        </Container>
+        
       </header>
     </div>
   );

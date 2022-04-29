@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/gapi": "0.0.41",
+    "@types/gapi.auth2": "0.0.56",
     "bcrypt": "^5.0.1",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
@@ -17,8 +19,14 @@
     "dotenv": "^8.6.0",
     "express": "^4.17.1",
     "express-session": "^1.17.2",
+    "googleapis": "^100.0.0",
     "jsonwebtoken": "^8.5.1",
     "mysql2": "^2.3.0",
+    "numpy": "0.0.1",
+    "passport": "^0.5.2",
+    "passport-google-oauth2": "^0.2.0",
+    "promisify-child-process": "^4.1.1",
+    "python-shell": "^3.0.1",
     "siphash": "^1.1.0",
     "socket.io": "^4.1.3"
   },

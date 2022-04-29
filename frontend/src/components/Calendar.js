@@ -3,16 +3,29 @@ import {Button,Card, Container, Row, Col} from 'react-bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { FaAngleDoubleLeft , FaAngleDoubleRight} from 'react-icons/fa';
 import {useEffect, useState, useRef} from "react"
-const Calendar = ({dates,appointments,changeDate, selectDay, activeApp}) => {
+const Calendar = ({dates,appointments,changeDate, selectDay, activeApp, setDayOpen}) => {
     const [selectedMonth, setSelectedMonth] = useState();
 
- 
+    const percentage2color = (input) => {
+        const percentage = (input/8) * 100
+        var r, g, b = 0;
+        if((100-percentage) < 50) {
+            r = 255;
+            g = Math.round(5.1 * (100 - percentage));
+        }
+        else {
+            g = 255;
+            r = Math.round(510 - 5.10 * (100-percentage));
+        }
+        var h = r * 0x10000 + g * 0x100 + b * 0x1;
+        return '#' + ('000000' + h.toString(16)).slice(-6);
+    }
 
     const createRow = (dates,rowNum) => {
         var columns = []
         for(let i=0;i<dates.length;i++){
             let day = ""
-            let date = new Date(dates[i])
+            let date = new Date(dates[i].date)
             switch(date.getDay()){
                 default:
                     day="sun-"
@@ -45,7 +58,7 @@ const Calendar = ({dates,appointments,changeDate, selectDay, activeApp}) => {
 
 
             columns.push(<Col id={columnID} className="p-0">
-            < Card onClick={()=>selectDay(date)} className={c}  style={{color: "#000"}}>
+            < Card onDoubleClick={()=>setDayOpen(dates[i])} onClick={()=>selectDay(date)} className={c}  style={{color: "#000",background: percentage2color(dates[i].workload)}}>
                     <Card.Body>
                         <Card.Title style={{fontSize: 30}}>
                             {date.getDate()}
@@ -64,9 +77,10 @@ const Calendar = ({dates,appointments,changeDate, selectDay, activeApp}) => {
         )
     }
 
-    const createShit = (dates) => {
+    const createRows = (dates) => {
         if(!dates) return
-
+        console.log("CREATEROWS DATES:")
+        console.log(dates)
         
         let rowCount = 5
         let columnCount = 7
@@ -81,9 +95,6 @@ const Calendar = ({dates,appointments,changeDate, selectDay, activeApp}) => {
 
         }
 
-
-        
-      
 
 
         return(
@@ -109,7 +120,7 @@ const Calendar = ({dates,appointments,changeDate, selectDay, activeApp}) => {
     useEffect(() => {
         if(dates && activeApp){
             console.log("Dates 5 Year: ")
-            console.log(new Date(dates[5]).getFullYear())
+            console.log(new Date(dates[5].date).getFullYear())
             console.log("activeApp Year: ")
             console.log(activeApp.getFullYear())
         }
@@ -119,11 +130,11 @@ const Calendar = ({dates,appointments,changeDate, selectDay, activeApp}) => {
         isInitialMount.current = false;
     } else {
         if(!dates) return
-        let split = new Date(dates[5])
+        let split = new Date(dates[5].date)
         if(dates) setSelectedMonth(split.getMonth() + "-" + split.getFullYear())
         console.log("Selected Month:" + split.getMonth() + "-" + split.getFullYear())
 
-        if(dates && activeApp && (new Date(dates[5])).getMonth() != activeApp.getMonth()) changeDate(activeApp)
+        if(dates && activeApp && (new Date(dates[5].date)).getMonth() != activeApp.getMonth()) changeDate(activeApp)
     }
 
     });
@@ -204,7 +215,7 @@ const Calendar = ({dates,appointments,changeDate, selectDay, activeApp}) => {
         </Container>
         
         <Container fluid>
-            {createShit(dates)}
+            {createRows(dates)}
          </Container>
     
     
