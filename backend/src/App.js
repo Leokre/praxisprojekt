@@ -17,8 +17,8 @@ const { spawn } = require('promisify-child-process');
 
 const {google} = require('googleapis')
 const oauth2Client = new google.auth.OAuth2(
-  '87060979239-qrfv9ardqd79qqv48sp6ks6084ncvih8.apps.googleusercontent.com',
-  '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',
+  process.env.GOOGLE_KEY,
+  process.env.GOOGLE_SECRET,
   "http://localhost:5000/google/callback"
 );
 
