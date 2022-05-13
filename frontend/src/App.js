@@ -33,14 +33,14 @@ function App() {
   
  
   const getExternalAppointments = async (code) =>{
+    //Lösche den Code-Parameter aus der URL
     window.history.pushState('', 'Title', '/');
+
     return Axios.post(backendURL + '/getExternalAppointments', {
       code: code,
     },{withCredentials:true})
     .then(function (response) {
-      console.log(response.data)
-      //window.location.href = 'http://localhost:3000'
-      //window.location.href = "www.mysite.com/page2.php";  
+      
       setImportedAppointments(response.data)
       
     })
@@ -192,7 +192,6 @@ function App() {
   const startAppointmentImport = (provider) => {
     if(!provider) return
     window.location = process.env.REACT_APP_BACKEND_URL + '/auth/' + provider
-
   }
 
   const createAppointment = (name,startDate,endDate,workload=0,description="") =>{
@@ -375,8 +374,8 @@ function App() {
 
 
     
-  const bla = window.location.search
-  const queryParams = new URLSearchParams(bla)
+  const url = window.location.search
+  const queryParams = new URLSearchParams(url)
   const code = queryParams.get("code")
   if(code){
     getExternalAppointments(code)
@@ -401,7 +400,7 @@ function App() {
   })
 
   useEffect(() => {
-    if(!importedAppointments) return
+    if(!importedAppointments || !importedAppointments[0]) return
     console.log("Appointment import received, creating appointments...")
     console.log("importedAppointments: ")
     console.log(importedAppointments[0].summary)

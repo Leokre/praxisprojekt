@@ -38,11 +38,11 @@ const CalendarDayDetailsModal = ({appointments,openDay,setOpenDay}) => {
 
                 <Row>
                     <Col md>
-                    <p>Termin: {appointmentName}</p> 
+                    <p><strong>Termin: </strong>{appointmentName}</p> 
                     
                     </Col>
                     <Col md>
-                    <p>Workload: {appointmentWorkload} Stunden</p>  
+                    <p><strong>Workload: </strong>{appointmentWorkload} Stunden</p>  
                     </Col>
                     </Row>
 
@@ -68,7 +68,7 @@ const CalendarDayDetailsModal = ({appointments,openDay,setOpenDay}) => {
         <ModalBody>
         <Row>
         <Col md>
-        <p>Gesamtworkload: {(openDay? openDay.workload : 0).toFixed(1)} Stunden</p> 
+        <p><strong>Gesamtworkload: </strong>{(openDay? openDay.workload : 0).toFixed(1)} Stunden</p> 
                     
         </Col>
         </Row>

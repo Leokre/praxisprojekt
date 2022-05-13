@@ -1,3 +1,4 @@
+
 const express = require('express')
 const app = express()
 const port = process.env.PORT || 5000
@@ -13,13 +14,14 @@ const mOccupiedDays = require("./model/occupiedDays.js")
 const helpers = require("./helpers.js")
 const url = require('url')
 const { spawn } = require('promisify-child-process');
-
+console.log(require('dotenv').config({path: '../.env'}))
+console.log(process.env.GOOGLE_KEY)
 
 const {google} = require('googleapis')
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_KEY,
   process.env.GOOGLE_SECRET,
-  "http://localhost:5000/google/callback"
+  process.env.GOOGLE_CALLBACK_URI
 );
 
 const scopes = [
@@ -27,12 +29,8 @@ const scopes = [
 ];
 
 const authorizationUrl = oauth2Client.generateAuthUrl({
-  // 'online' (default) or 'offline' (gets refresh_token)
   access_type: 'offline',
-  /** Pass in the scopes array defined above.
-    * Alternatively, if only one scope is needed, you can pass a scope URL as a string */
   scope: scopes,
-  // Enable incremental authorization. Recommended as a best practice.
   include_granted_scopes: true
 });
 
@@ -160,45 +158,33 @@ const generateWorkloadDistribution = async (startDate,endDate,workload) => {
   
 }
 
-app.get("/test",async (req,res)=>{
-  console.log("authURL:" + authorizationUrl)
-  res.send('<a href="/auth/google">Google Auth</a>') 
-  })
 
 app.get("/auth/google",authenticateToken,(req,res,next)=>{
   res.writeHead(301, { "Location": authorizationUrl })
   res.end()
-}
-
-  
-  )
+})
 
 
 app.post("/getExternalAppointments",async (req,res,next)=>{
   const code = req.body.code
-  console.log("getExternalAppointments called")
+
   let { tokens } = await oauth2Client.getToken(code);
   oauth2Client.setCredentials(tokens);
   let events = await listEvents(oauth2Client)
-  console.log("events:")
-  console.log(events)
+
   res.json(events)
-  //res.events = events
-  //res.redirect('http://localhost:3000/')
 })
 
 
 
 app.get("/google/callback",async (req,res,next)=>{
-  let callback_url = new URL('http://localhost:5000' + req.url)
+  let callback_url = new URL(process.env.BACK_END_ADDRESS + req.url)
   let callback_params = callback_url.searchParams;
-  if(callback_params.get('error')) return res.send("ERROR: " + callback_params.get('error'))
-  //if(callback_params.get('code')) return res.send("Code: " + callback_params.get('code'))
 
-  // Get access and refresh tokens (if access_type is offline)
+  if(callback_params.get('error')) return res.send("ERROR: " + callback_params.get('error'))
 
   let encodedCode = encodeURIComponent(callback_params.get('code'))
-  return res.redirect('http://localhost:3000/?code=' + encodedCode)
+  return res.redirect(process.env.FRONT_END_ADDRESS + '/?code=' + encodedCode)
 })
 
 
@@ -220,7 +206,6 @@ app.get("/google/callback",async (req,res,next)=>{
       resolve(events)
     });
   });
-
   }
 
     app.get("/success",async (req,res,next)=>{
